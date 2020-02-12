@@ -19,6 +19,14 @@ ADD xorgxrdp /etc/apt/preferences.d/xorgxrdp
 #RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y xrdp xfce4 xfce4-terminal xorgxrdp
 RUN sed -i.bak '/fi/a #xrdp multiple users configuration \n xfce-session \n' /etc/xrdp/startwm.sh
+
+RUN mkdir -p /etc/apt/sources-list.d \
+ && echo deb https://deb.torproject.org/torproject.org stretch main > /etc/apt/sources-list.d/torproject.list \
+ && curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import \
+ && gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | apt-key add - \
+ && apt-get update \
+ && apt-get install -y tor
+
 EXPOSE 3389
 
 #ADD logo.bmp /usr/local/share/xrdp/logo.bmp

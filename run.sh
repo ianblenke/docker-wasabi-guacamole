@@ -301,6 +301,29 @@ stderr_logfile=/dev/fd/2
 stderr_logfile_maxbytes=0
 EOF
 
+cat <<EOF > /usr/local/bin/run-tor.sh
+#!/bin/bash
+exec tor
+EOF
+
+chmod 755 /usr/local/bin/run-tor.sh
+
+cat > /etc/supervisor/conf.d/tor.conf <<EOF
+[program:tor]
+command=/usr/local/bin/run-tor.sh
+priority=10
+directory=/var/lib/tor
+process_name=%(program_name)s
+autostart=true
+autorestart=true
+stopsignal=TERM
+stopwaitsecs=1
+stdout_logfile=/dev/fd/1
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/fd/2
+stderr_logfile_maxbytes=0
+EOF
+
 chown daemon:daemon /etc/supervisor/conf.d/ /var/run/ /var/log/supervisor/
 
 # Add users here
@@ -312,8 +335,7 @@ chown -R ${RDP_USERNAME}:${RDP_USERNAME} /home/${RDP_USERNAME}
 
 cat <<EOF > /usr/local/bin/wasabi
 #!/bin/bash
-cd /publish/WalletWasabi.Gui
-exec dotnet run
+exec /publish/WalletWasabi.Gui
 EOF
 
 chmod 755 /usr/local/bin/wasabi
