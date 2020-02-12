@@ -1,0 +1,89 @@
+# Start from CentOS base image
+FROM ibmcom/centos-ppc64le:7
+
+## FROM guacamole/guacd
+## Derived from https://github.com/glyptodon/guacamole-server/blob/master/Dockerfile
+
+# Environment variables
+ENV \
+    BUILD_DIR=/tmp/guacd-docker-BUILD \
+    LC_ALL=en_US.UTF-8                \
+    RUNTIME_DEPENDENCIES="            \
+        cairo                         \
+        dejavu-sans-mono-fonts        \
+        freerdp                       \
+        freerdp-plugins               \
+        ghostscript                   \
+        libjpeg-turbo                 \
+        libssh2                       \
+        liberation-mono-fonts         \
+        libtelnet                     \
+        libvorbis                     \
+        libvncserver                  \
+        libwebp                       \
+        pango                         \
+        pulseaudio-libs               \
+        terminus-fonts                \
+        uuid"                         \
+    BUILD_DEPENDENCIES="              \
+        autoconf                      \
+        automake                      \
+        cairo-devel                   \
+        freerdp-devel                 \
+        gcc                           \
+        libjpeg-turbo-devel           \
+        libssh2-devel                 \
+        libtool                       \
+        libtelnet-devel               \
+        libvorbis-devel               \
+        libvncserver-devel            \
+        libwebp-devel                 \
+        make                          \
+        pango-devel                   \
+        pulseaudio-libs-devel         \
+        uuid-devel"
+
+# Bring environment up-to-date and install guacamole-server dependencies
+RUN yum -y update                        && \
+    yum -y install epel-release          && \
+    yum -y install $RUNTIME_DEPENDENCIES && \
+    yum clean all
+
+RUN sed -i -e 's/^#baseurl/baseurl/' /etc/yum.repos.d/epel.repo && \
+    sed -i -e 's/^mirrorlist/#mirrorlist/' /etc/yum.repos.d/epel.repo && \
+    cat /etc/yum.repos.d/epel.repo
+RUN yum -y update
+RUN yum -y install git
+
+RUN git clone https://github.com/glyptodon/guacamole-server /guacamole-server
+
+WORKDIR /guacamole-server
+
+# Add configuration scripts
+RUN mkdir -p /opt/guacd/bin
+RUN cp -a src/guacd-docker/bin/* /opt/guacd/bin/
+
+# Copy source to container for sake of build
+RUN mkdir -p "$BUILD_DIR"
+RUN cp -a . "$BUILD_DIR"
+
+# Build guacamole-server from local source
+RUN yum -y install $BUILD_DEPENDENCIES         && \
+    /opt/guacd/bin/build-guacd.sh "$BUILD_DIR" && \
+    rm -Rf "$BUILD_DIR"                        && \
+    yum -y autoremove $BUILD_DEPENDENCIES      && \
+    yum clean all
+
+# Start guacd, listening on port 0.0.0.0:4822
+EXPOSE 4822
+CMD [ "/usr/local/sbin/guacd", "-b", "0.0.0.0", "-f" ]
+
+##
+## Local changes from the base guacamole/guacd image
+##
+
+RUN yum install -y jq
+
+ADD run.sh /run.sh
+
+CMD /run.sh

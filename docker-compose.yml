@@ -1,0 +1,84 @@
+version: "3.7"
+
+volumes:
+
+  postgres-data:
+    driver: local
+  guacamole-data:
+    driver: local
+  home:
+    driver: local
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    container_name: postgres
+    hostname: postgres
+    environment:
+      #PGDATA: /var/lib/postgresql/data
+      #POSTGRES_USER: postgres
+      #POSTGRES_DB: postgres
+      #POSTGRES_INITDB_ARGS: "--data-checksums"
+      #POSTGRES_INITDB_XLOGDIR: ...
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    container_name: adminer
+    hostname: adminer
+    ports:
+      - 18080:8080
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  guacd:
+    build:
+      context: guacd/
+      dockerfile: Dockerfile.x86_64
+    image: guacd
+    restart: always
+    container_name: guacd
+    hostname: guacd
+    ports:
+      - 4822:4822
+
+  guacamole:
+    build:
+      context: guacamole/
+      dockerfile: Dockerfile.x86_64
+    image: sofwerx/guacamole
+    restart: always
+    container_name: guacamole
+    hostname: guacamole
+    volumes:
+      - guacamole-data:/data
+    environment:
+      POSTGRES_HOSTNAME: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      GUACD_HOSTNAME: guacd
+      GUACD_PORT: 4822
+    ports:
+      - 28080:8080
+
+  wasabi:
+    container_name: wasabi
+    hostname: wasabi
+    image: wasabi
+    build: .
+    privileged: true
+    ports:
+    - "3389:3389"
+    volumes:
+    - "home:/home"
+    environment:
+      RDP_USERNAME: ${RDP_USERNAME}
+      RDP_PASSWORD: ${RDP_PASSWORD}
+

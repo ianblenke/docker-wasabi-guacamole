@@ -1,0 +1,8 @@
+FROM guacamole/guacd
+
+RUN apt-get update \
+ && apt-get install -y jq
+
+ADD run.sh /run.sh
+
+CMD /run.sh
