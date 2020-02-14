@@ -37,10 +37,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   guacd:
-    build:
-      context: guacd/
-      dockerfile: Dockerfile.x86_64
-    image: guacd
+    image: ianblenke/guacd
     restart: always
     container_name: guacd
     hostname: guacd
