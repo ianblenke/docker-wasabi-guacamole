@@ -1,4 +1,4 @@
-FROM guacamole/guacd
+FROM ianblenke/guacamole-server
 
 RUN apt-get update \
  && apt-get install -y jq
