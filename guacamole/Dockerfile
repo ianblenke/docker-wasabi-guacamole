@@ -1,4 +1,8 @@
-FROM guacamole/guacamole
+FROM ianblenke/guacamole-client
+
+##
+## Our local changes to guacamole begin here
+##
 
 RUN apt-get update ; apt-get install -y postgresql-client
 
