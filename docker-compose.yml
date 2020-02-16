@@ -45,10 +45,7 @@ services:
       - 4822:4822
 
   guacamole:
-    build:
-      context: guacamole/
-      dockerfile: Dockerfile.x86_64
-    image: sofwerx/guacamole
+    image: ianblenke/guacamole
     restart: always
     container_name: guacamole
     hostname: guacamole
@@ -68,8 +65,7 @@ services:
   wasabi:
     container_name: wasabi
     hostname: wasabi
-    image: wasabi
-    build: .
+    image: ianblenke/wasabiwallet
     privileged: true
     ports:
     - "3389:3389"
