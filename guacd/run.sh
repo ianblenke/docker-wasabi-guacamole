@@ -12,5 +12,8 @@ if [ -f /ssl/acme.json ]; then
   SSL="-C /etc/ssl/certs/guacd.crt -K /etc/ssl/private/guacd.key"
 fi
 
-exec /usr/local/guacamole/sbin/guacd -b 0.0.0.0 -f ${SSL}
-
+if [ -n "$TORSOCKS" ]; then
+  exec $TORSOCKS /usr/local/guacamole/sbin/guacd -b 0.0.0.0 -f ${SSL}
+else
+  exec /usr/local/guacamole/sbin/guacd -b 0.0.0.0 -f ${SSL}
+fi
