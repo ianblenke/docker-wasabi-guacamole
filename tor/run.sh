@@ -21,9 +21,9 @@ cat <<EOF > /etc/torrc.d/ssh
 HiddenServiceDir /var/lib/tor/ssh/
 HiddenServiceVersion 3
 HiddenServicePort 22 ${ssh_host_ip}:${ssh_host_port}
-HiddenServicePort 3389 wasabiwallet:3389
-HiddenServicePort 4822 guacd:4822
-HiddenServicePort 8080 guacamole:992
+HiddenServicePort 3389 ${ssh_host_ip}:3389
+HiddenServicePort 4822 ${ssh_host_ip}:4822
+HiddenServicePort 8080 ${ssh_host_ip}:8080
 
 SafeLogging 0
 Log notice stdout
