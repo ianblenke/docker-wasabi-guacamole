@@ -1,5 +1,8 @@
 version: "3.7"
 
+networks:
+  wasabi-guacamole:
+
 volumes:
 
   postgres-data:
@@ -7,6 +10,8 @@ volumes:
   guacamole-data:
     driver: local
   home:
+    driver: local
+  tor:
     driver: local
 
 services:
@@ -25,6 +30,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - wasabi-guacamole
 
   adminer:
     image: adminer
@@ -35,17 +43,25 @@ services:
       - 18080:8080
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: always
+    networks:
+      - wasabi-guacamole
 
   guacd:
-    image: ianblenke/guacd
+    image: ianblenke/docker-wasabi-guacamole_guacd
     restart: always
     container_name: guacd
     hostname: guacd
     ports:
       - 4822:4822
+    environment:
+      TORSOCKS: "torsocks -a tor -P 9050"
+    restart: always
+    networks:
+      - wasabi-guacamole
 
   guacamole:
-    image: ianblenke/guacamole
+    image: ianblenke/docker-wasabi-guacamole_guacamole
     restart: always
     container_name: guacamole
     hostname: guacamole
@@ -61,6 +77,19 @@ services:
       GUACD_PORT: 4822
     ports:
       - 28080:8080
+    restart: always
+    networks:
+      - wasabi-guacamole
+
+  tor:
+    hostname: tor
+    container_name: tor
+    image: ianblenke/docker-wasabi-guacamole_tor:latest
+    volumes:
+      - tor:/var/lib/tor
+    restart: always
+    networks:
+      - wasabi-guacamole
 
   wasabi:
     container_name: wasabi
@@ -74,4 +103,7 @@ services:
     environment:
       RDP_USERNAME: ${RDP_USERNAME}
       RDP_PASSWORD: ${RDP_PASSWORD}
+    restart: always
+    networks:
+      - wasabi-guacamole
 
