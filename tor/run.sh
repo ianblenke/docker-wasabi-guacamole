@@ -32,11 +32,13 @@ EOF
 echo "Configuration:"
 grep -v -e '^#\|^$' /etc/tor/torrc /etc/torrc.d/*
 
-if [ -f /var/lib/tor/ssb-pub/hostname ]; then
-  echo 'Onion Hostname:' $(cat /var/lib/tor/ssh-ssb/hostname)
+if [ -f /var/lib/tor/ssh/hostname ]; then
+  echo 'Onion Hostname:' $(cat /var/lib/tor/ssh/hostname)
 fi
 
 sed -i% -e 's%/sbin/nologin%/bin/bash%' /etc/passwd
+
+grep . /etc/torrc.d/*
 
 chown -R tor /var/lib/tor
 chmod 1777 /var/lib/tor
