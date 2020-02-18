@@ -13,4 +13,4 @@ EXPOSE 9050
 
 VOLUME /var/lib/tor
 
-CMD bash -x /run.sh
+CMD bash /run.sh
